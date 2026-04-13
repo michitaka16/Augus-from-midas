@@ -66,3 +66,13 @@ secrets/
 **/scripts/data/
 **/scripts/outputs/
 **/scripts/*.log
+
+# Node.js / TypeScript
+node_modules/
+.next/
+.expo/
+dist/
+*.tsbuildinfo
+
+# Test results
+.test-results

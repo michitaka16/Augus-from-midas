@@ -1,0 +1,25 @@
+{
+  "name": "@midas/mobile",
+  "version": "0.1.0",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "expo": "~51.0.0",
+    "expo-local-authentication": "~14.0.0",
+    "expo-notifications": "~0.28.0",
+    "expo-router": "~3.5.0",
+    "react": "^18.3.0",
+    "react-native": "0.74.0",
+    "@midas/types": "*"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "typescript": "^5.5.0"
+  }
+}

@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "midas-api"
+version = "0.1.0"
+description = "Midas API gateway — Nexus-based signal broadcast, auth, approvals, debate routing"
+requires-python = ">=3.11"
+dependencies = [
+    "kailash>=2.6.0",
+    "kailash-nexus>=1.9.0",
+    "kailash-dataflow>=1.8.0",
+    "midas-data",
+    "midas-strategy",
+    "midas-backtest",
+    "midas-broker",
+    "midas-debate",
+    "midas-governance",
+    "structlog>=23.1.0",
+    "python-dotenv>=1.0.0",
+    "bcrypt>=4.0.0",
+    "pyjwt>=2.8.0",
+    "aiohttp>=3.9.0",
+    "aiohttp-cors>=0.7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.2.0",
+    "pytest-asyncio>=0.21.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

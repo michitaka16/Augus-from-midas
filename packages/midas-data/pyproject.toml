@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=65.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "midas-data"
+version = "0.1.0"
+description = "Midas data fabric — EODHD, FRED, Yahoo, Perplexity ingestion with TimescaleDB + pgvector storage"
+requires-python = ">=3.11"
+dependencies = [
+    "kailash>=2.6.0",
+    "kailash-dataflow>=1.8.0",
+    "python-dotenv>=1.0.0",
+    "structlog>=23.1.0",
+    "redis>=5.0.0",
+    "httpx>=0.27.0",
+    "polars>=1.0",
+    "numpy>=1.26.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.2.0",
+    "pytest-asyncio>=0.21.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

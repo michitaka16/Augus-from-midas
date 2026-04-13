@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "Midas",
+    "slug": "midas-mobile",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "backgroundColor": "#0A0B0E"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.midas.app",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Authenticate to approve trades"
+      }
+    },
+    "android": {
+      "package": "com.midas.app"
+    },
+    "plugins": [
+      "expo-local-authentication",
+      "expo-notifications",
+      "expo-router"
+    ]
+  }
+}

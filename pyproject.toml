@@ -3,11 +3,11 @@ requires = ["setuptools>=65.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "my-kailash-project"  # TODO: Replace with your project name
+name = "midas-platform"
 version = "0.1.0"
-description = "A Kailash SDK project"  # TODO: Replace with your project description
+description = "Regime-aware multi-asset ETF portfolio manager with debate-with-AI"
 authors = [
-    {name = "Your Name", email = "your.email@example.com"}  # TODO: Replace with your info
+    {name = "Takahide Kawabe"}
 ]
 readme = "README.md"
 requires-python = ">=3.11"
@@ -60,19 +60,20 @@ dev = [
     "pre-commit>=4.2.0",
 ]
 
-[project.urls]
-# TODO: Replace with your project URLs
-# "Homepage" = "https://github.com/your-org/your-project"
-# "Bug Tracker" = "https://github.com/your-org/your-project/issues"
-
 [tool.setuptools.packages.find]
 where = ["."]
-exclude = ["tests*", ".*", "__pycache__*"]
+exclude = ["tests*", ".*", "__pycache__*", "apps*", "packages*", "shared*"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
-testpaths = ["tests"]
+testpaths = ["tests", "packages/midas-data/tests", "packages/midas-strategy/tests", "packages/midas-backtest/tests", "packages/midas-broker/tests", "packages/midas-debate/tests", "packages/midas-governance/tests", "apps/api/tests"]
+markers = [
+    "unit: Tier 1 unit tests (mocking allowed)",
+    "integration: Tier 2 integration tests (real infrastructure)",
+    "e2e: Tier 3 end-to-end tests (real everything)",
+    "regression: Permanent bug reproduction tests",
+]
 filterwarnings = [
     "ignore::DeprecationWarning",
 ]

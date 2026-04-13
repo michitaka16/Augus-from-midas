@@ -1,0 +1,23 @@
+{
+  "name": "midas-platform",
+  "private": true,
+  "workspaces": [
+    "apps/web",
+    "apps/mobile",
+    "shared/types",
+    "shared/tokens"
+  ],
+  "scripts": {
+    "dev:web": "npm run dev --workspace=apps/web",
+    "dev:mobile": "npm run start --workspace=apps/mobile",
+    "build:web": "npm run build --workspace=apps/web",
+    "build:types": "npm run build --workspace=shared/types",
+    "lint": "eslint . --ext .ts,.tsx",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.5.0"
+  }
+}
