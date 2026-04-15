@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import AuthBadge from "@/components/AuthBadge";
 
 export const metadata: Metadata = {
   title: "Midas — Regime-Aware Portfolio Manager",
@@ -30,6 +31,7 @@ export default function RootLayout({
               <NavItem href="/audit" label="Trade Log" />
               <NavItem href="/settings" label="Settings" />
             </ul>
+            <AuthBadge />
           </nav>
           <main className="flex-1 p-6 md:p-8">{children}</main>
         </div>

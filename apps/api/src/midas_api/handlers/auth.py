@@ -20,8 +20,11 @@ import structlog
 logger = structlog.get_logger(__name__)
 
 _JWT_SECRET = os.environ.get("JWT_SECRET_KEY", "change-me-in-production")
-_ACCESS_TOKEN_EXPIRY = timedelta(minutes=15)
-_REFRESH_TOKEN_EXPIRY = timedelta(days=7)
+# Longer-lived tokens for a portfolio app where users check infrequently.
+# Web client also auto-refreshes on 401 so users effectively stay logged in
+# for the full refresh window without re-entering credentials.
+_ACCESS_TOKEN_EXPIRY = timedelta(hours=24)
+_REFRESH_TOKEN_EXPIRY = timedelta(days=30)
 
 
 class AuthHandlers:
