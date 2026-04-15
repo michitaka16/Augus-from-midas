@@ -146,15 +146,20 @@ class DebateAgent:
     async def _call_llm(self, messages: list[dict]) -> str:
         """Call the LLM. Provider + model from .env (NEVER hardcoded).
 
-        Provider resolution order:
-        1. MiniMax (MINIMAX_API_KEY) — OpenAI-compatible API, primary
-        2. ZAI (ZAI_API_KEY) — OpenAI-compatible, first fallback
-        3. OpenAI (OPENAI_API_KEY) — second fallback
-        4. Anthropic (ANTHROPIC_API_KEY) — different format, last resort
+        Provider resolution order (Anthropic first because ZAI's
+        Anthropic-compatible endpoint is the most reliable working path):
+        1. Anthropic-compatible (ANTHROPIC_API_KEY + optional ANTHROPIC_BASE_URL)
+        2. MiniMax (MINIMAX_API_KEY) — OpenAI-compatible
+        3. ZAI native (ZAI_API_KEY) — OpenAI-compatible
+        4. OpenAI (OPENAI_API_KEY) — OpenAI-compatible
         """
         # Build provider chain. On failure, fall through to next.
         # This is error-handling (permitted deterministic logic), not agent routing.
         providers: list[tuple[str, str, str, bool]] = []
+
+        anthropic_key = os.environ.get("ANTHROPIC_API_KEY", "")
+        if anthropic_key:
+            providers.append(("anthropic", anthropic_key, "", True))
 
         minimax_key = os.environ.get("MINIMAX_API_KEY", "")
         if minimax_key:
@@ -167,10 +172,6 @@ class DebateAgent:
         openai_key = os.environ.get("OPENAI_API_KEY", "")
         if openai_key:
             providers.append(("openai", openai_key, "https://api.openai.com/v1", False))
-
-        anthropic_key = os.environ.get("ANTHROPIC_API_KEY", "")
-        if anthropic_key:
-            providers.append(("anthropic", anthropic_key, "", True))
 
         if not providers:
             return "No LLM API key configured. Set MINIMAX_API_KEY, ZAI_API_KEY, OPENAI_API_KEY, or ANTHROPIC_API_KEY in .env."
@@ -235,7 +236,13 @@ class DebateAgent:
             raise
 
     async def _call_anthropic(self, messages: list[dict], api_key: str) -> str:
-        """Call Anthropic API (non-OpenAI format, last resort fallback)."""
+        """Call Anthropic-compatible API.
+
+        Honors ANTHROPIC_BASE_URL (e.g., https://api.z.ai/api/anthropic for
+        ZAI's Anthropic-compatible endpoint) and ANTHROPIC_MODEL (e.g., glm-5.1)
+        so the same code works against Anthropic, ZAI, or any other provider
+        that implements the Anthropic /v1/messages protocol.
+        """
         import httpx
 
         system_msg = ""
@@ -246,18 +253,22 @@ class DebateAgent:
             else:
                 user_msgs.append(msg)
 
-        logger.info("debate.llm_call", provider="anthropic", model=self._model)
+        base_url = os.environ.get("ANTHROPIC_BASE_URL", "https://api.anthropic.com").rstrip("/")
+        model = os.environ.get("ANTHROPIC_MODEL", self._model)
+        url = f"{base_url}/v1/messages"
+
+        logger.info("debate.llm_call", provider="anthropic", model=model, url=url)
         try:
             async with httpx.AsyncClient(timeout=60.0) as client:
                 resp = await client.post(
-                    "https://api.anthropic.com/v1/messages",
+                    url,
                     headers={
                         "x-api-key": api_key,
                         "anthropic-version": "2023-06-01",
                         "content-type": "application/json",
                     },
                     json={
-                        "model": self._model,
+                        "model": model,
                         "system": system_msg,
                         "messages": user_msgs,
                         "max_tokens": 2000,
