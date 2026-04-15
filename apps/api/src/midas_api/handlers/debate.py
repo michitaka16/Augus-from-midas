@@ -76,18 +76,26 @@ class DebateHandlers:
                 "suggested_followups": ["Set up .env with your LLM API key"],
             }
 
-        # Store assistant response
-        await self._conn.execute(
-            """INSERT INTO users.debate_messages
-               (user_id, role, content, citations_json, suggested_followups_json, ungrounded_claims_json, model_portfolio_id)
-               VALUES ($1, 'assistant', $2, $3, $4, $5, $6)""",
-            user_id,
-            response.get("content", ""),
-            json.dumps(response.get("citations", [])),
-            json.dumps(response.get("suggested_followups", [])),
-            json.dumps(response.get("ungrounded_claims", [])),
-            "growth",
-        )
+        # Store assistant response — but skip persisting LLM-failure placeholders.
+        # If the LLM call failed (no key, 401, network), the user sees the error
+        # in this response, but we don't pollute the conversation history with
+        # the error message. When they fix the config and retry, history is clean.
+        is_llm_failure = "llm_call_failed" in (response.get("ungrounded_claims") or [])
+        if not is_llm_failure:
+            await self._conn.execute(
+                """INSERT INTO users.debate_messages
+                   (user_id, role, content, citations_json, suggested_followups_json, ungrounded_claims_json, model_portfolio_id)
+                   VALUES ($1, 'assistant', $2, $3, $4, $5, $6)""",
+                user_id,
+                response.get("content", ""),
+                json.dumps(response.get("citations", [])),
+                json.dumps(response.get("suggested_followups", [])),
+                json.dumps(response.get("ungrounded_claims", [])),
+                "growth",
+            )
+            logger.info("debate.message.persisted", user_id=user_id)
+        else:
+            logger.warning("debate.message.not_persisted", user_id=user_id, reason="llm_failure")
 
         logger.info("debate.message.complete", user_id=user_id)
         return {
