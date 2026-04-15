@@ -13,29 +13,86 @@ import { account } from "@/lib/api";
 export default function SettingsPage() {
   const [profile, setProfile] = useState<any>(null);
   const [activePortfolio, setActivePortfolio] = useState("growth");
+  const [saving, setSaving] = useState<string | null>(null);
+  const [message, setMessage] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [authError, setAuthError] = useState(false);
 
   useEffect(() => {
     async function load() {
+      const token = localStorage.getItem("midas_token") ?? "";
+      if (!token) {
+        setAuthError(true);
+        return;
+      }
       try {
-        const token = localStorage.getItem("midas_token") ?? "";
-        const res = await account.getProfile(token) as any;
+        const res = (await account.getProfile(token)) as any;
         if (res?.preferences) {
           setProfile(res);
           setActivePortfolio(res.preferences.model_portfolio_id);
         }
-      } catch {}
+      } catch (e: any) {
+        if (e?.status === 401) setAuthError(true);
+        else setMessage({ type: "err", text: `Failed to load profile: ${e?.message ?? "unknown"}` });
+      }
     }
     load();
   }, []);
 
   const handlePortfolioChange = async (id: string) => {
     const token = localStorage.getItem("midas_token") ?? "";
-    await account.updatePortfolio(token, id);
-    setActivePortfolio(id);
+    if (!token) {
+      setAuthError(true);
+      return;
+    }
+    if (id === activePortfolio || saving) return;
+    setSaving(id);
+    setMessage(null);
+    try {
+      await account.updatePortfolio(token, id);
+      setActivePortfolio(id);
+      setMessage({ type: "ok", text: `Switched to ${id.replace(/_/g, " ")}` });
+    } catch (e: any) {
+      if (e?.status === 401) {
+        setAuthError(true);
+      } else {
+        setMessage({ type: "err", text: `Failed to switch: ${e?.message ?? "API error"}` });
+      }
+    } finally {
+      setSaving(null);
+    }
   };
+
+  if (authError) {
+    return (
+      <div className="max-w-3xl mx-auto py-16 text-center">
+        <h1 className="text-2xl font-bold mb-4">Sign in required</h1>
+        <p className="text-text-secondary mb-6">
+          You need to be logged in to change settings. Your session may have expired.
+        </p>
+        <a
+          href="/login"
+          className="px-6 py-3 rounded-lg bg-accent-primary hover:bg-accent-hover text-white font-medium inline-block"
+        >
+          Sign In
+        </a>
+      </div>
+    );
+  }
   return (
     <div className="max-w-3xl mx-auto space-y-8">
       <h1 className="text-2xl font-bold">Settings</h1>
+
+      {message && (
+        <div
+          className={`rounded-lg p-3 text-sm ${
+            message.type === "ok"
+              ? "bg-regime-normal-bg border border-regime-normal/20 text-regime-normal"
+              : "bg-regime-turbulent-bg border border-regime-turbulent/20 text-regime-turbulent"
+          }`}
+        >
+          {message.text}
+        </div>
+      )}
 
       {/* Portfolio Selection */}
       <Section title="Model Portfolio">
@@ -50,17 +107,20 @@ export default function SettingsPage() {
             <button
               key={p.id}
               onClick={() => handlePortfolioChange(p.id)}
+              disabled={saving !== null}
               className={`p-4 rounded-xl border text-left transition-colors ${
                 activePortfolio === p.id
                   ? "border-accent-primary bg-accent-muted"
                   : "border-border hover:border-border-hover"
-              }`}
+              } ${saving !== null ? "opacity-60 cursor-wait" : "cursor-pointer"}`}
             >
               <p className="font-medium">{p.name}</p>
               <p className="text-text-muted text-sm mt-1">Vol target: {p.vol} | {p.price}</p>
-              {activePortfolio === p.id && (
+              {saving === p.id ? (
+                <p className="text-accent-primary text-xs mt-1">Saving…</p>
+              ) : activePortfolio === p.id ? (
                 <p className="text-accent-primary text-xs mt-1">Active</p>
-              )}
+              ) : null}
             </button>
           ))}
         </div>
