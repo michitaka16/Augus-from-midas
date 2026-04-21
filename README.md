@@ -1,8 +1,90 @@
+# Argus — Investment Guideline AI for Individual Investors
+
+**Argus** is an ETF compliance and recommendation dashboard that validates investment portfolios
+against user-defined screens using K-means clustering similarity (cosine similarity to a
+reference portfolio). Built as MGMT 655 Individual Assignment — evolved from Week 3 prototype
+"Midas" (debate-with-AI allocator). Pivot rationale: from "what should I buy?" to "does my
+portfolio violate my guidelines?"
+
+## Quick Start
+
+```bash
+# Python 3.11+
+python3 --version
+
+# Create + activate venv
+python3 -m venv .venv && source .venv/bin/activate
+
+# Install dependencies
+uv sync
+
+# Run the app
+python apps/argus/dash_app.py
+# → http://127.0.0.1:8050
+```
+
+## Run Tests
+
+```bash
+source .venv/bin/activate
+python - << 'EOF'
+from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.preprocessing import StandardScaler
+import pandas as pd
+
+_universe = pd.read_csv('apps/argus/data/etf_universe.csv', index_col=0)
+df = pd.read_csv('apps/argus/data/etf_xray_features.csv', index_col=0)
+df = df.drop(columns=['is_leveraged'], errors='ignore')
+df['asset_class_equity'] = _universe['asset_class_equity']
+FEAT9 = ["country_exposure","sector_exposure","expense_ratio",
+         "volatility_252d","momentum_126d","liquidity","yield","corr_to_spy","asset_class_equity"]
+_X9_scaled = StandardScaler().fit_transform(df[FEAT9].values)
+ticker_idx = {t: i for i, t in enumerate(_universe.index)}
+esgu_v = _X9_scaled[ticker_idx['ESGU']].reshape(1, -1)
+for ticker in ['ESGU', 'VTI', 'XLE', 'AGG']:
+    sim = cosine_similarity(esgu_v, _X9_scaled[ticker_idx[ticker]].reshape(1, -1))[0][0]
+    status = "GREEN" if sim >= 0.80 else "YELLOW" if sim >= 0.60 else "RED"
+    print(f"  {ticker}: sim={sim:+.4f} -> {status}")
+EOF
+```
+
+## File Structure
+
+```
+apps/argus/
+  dash_app.py              # Dash app + compliance engine + clustering
+  data/
+    etf_universe.csv      # 23 ETFs (name, sleeve, asset_class_equity)
+    etf_xray_features.csv # 9D feature vector per ETF
+    presets.json           # 10 presets (ethical, geopolitical, risk, sector, ESG)
+    cluster_results.json   # K=5 cluster assignments
+    umap_coords.json      # UMAP 2D coords for visualization
+workspaces/argus/journal/  # 14 decision log entries
+deliverables/              # Pitch deck v2 + archive
+old/                       # Midas prototype preserved for decision log evidence
+```
+
+## Presets (10 total)
+
+| Category | Name | Rule Type |
+|----------|------|-----------|
+| Ethical & ESG | Ethical Investor, Climate First, ESG Screen | Categorical + similarity benchmark |
+| Geopolitical | Geopolitical Screen | Per-country hard/soft flags |
+| Risk & Cost | Low Volatility, High Dividend, Cost-Conscious | Feature threshold |
+| Sector Focus | Tech-Heavy, Tech-Free | Ticker list |
+| Portfolio Structure | Core-Satellite | Portfolio-level cluster |
+
+## Tech Stack
+
+Dash · scikit-learn · pandas · numpy · Kailash SDK (`.claude/`)
+
+---
+
 # Kailash COC Claude (Python)
 
 <p align="center">
   <img src="https://img.shields.io/badge/platform-Claude%20Code-7C3AED.svg" alt="Claude Code">
-  <img src="https://img.shields.io/badge/architecture-COC%205--Layer-blue.svg" alt="COC 5-Layer">
+  <img src="https://img.shields.io/badge/architecture-COC%205--Layer-blue.svg" alt="CO Layer">
   <img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="Apache 2.0">
 </p>
 
@@ -34,7 +116,7 @@ Your Natural Language Request
          |
   5. Learning     Observe -> Evolve  How does the system improve?
          |
-  Production-Ready Code
+ Production-Ready Code
 ```
 
 ### Layer 1: Intent -- 30 Specialized Agents
@@ -100,11 +182,11 @@ The system discovers recurring patterns and automatically generates new skills, 
 
 ---
 
-## Quick Start
+## Quick Start (Kailash COC)
 
 ```bash
 # Clone
-git clone https://github.com/your-org/kailash-coc-claude-py.git
+git clone https://github.com/terrene-foundation/kailash-coc-claude-py.git
 cd kailash-coc-claude-py
 
 # Configure
@@ -137,7 +219,7 @@ workspaces/
   instructions/    5 phase templates (analyze, todos, implement, validate, codify)
   <project>/       Per-project workspace directories
 
-CLAUDE.md          Root instructions (auto-loaded every session)
+README.md          This file (Argus project overview + Kailash COC docs)
 pyproject.toml     Python dependencies
 .env.example       Environment template
 ```
@@ -146,15 +228,13 @@ pyproject.toml     Python dependencies
 
 ## Relationship to CARE/EATP
 
-COC applies the same trust architecture from the [Kailash SDK's CARE/EATP framework](https://github.com/your-org/kailash_sdk) to codegen: humans define the operating envelope (Trust Plane), AI executes within those boundaries at machine speed (Execution Plane). Rules and hooks form the Operating Envelope. Mandatory review gates maintain Trust Lineage. Hook enforcement provides Audit Anchors.
+COC applies the same trust architecture from the [Kailash SDK's CARE/EATP framework](https://github.com/terrene-foundation/kailash-py) to codegen: humans define the operating envelope (Trust Plane), AI executes within those boundaries at machine speed (Execution Plane). Rules and hooks form the Operating Envelope. Mandatory review gates maintain Trust Lineage. Hook enforcement provides Audit Anchors.
 
 ---
 
 ## Built For Kailash, Designed For Everyone
 
-Built for the [Kailash SDK](https://github.com/your-org/kailash_sdk) ecosystem ([Core SDK](https://github.com/your-org/kailash_sdk), [DataFlow](https://github.com/your-org/kailash-dataflow), [Nexus](https://github.com/your-org/kailash-nexus), [Kaizen](https://github.com/your-org/kailash-kaizen)), but the COC architecture is framework-agnostic. Fork this repo, replace the Kailash-specific skills and agents with your own framework knowledge, and you have COC for any stack.
-
-**Sibling repo**: [kailash-vibe-gemini-setup](https://github.com/your-org/kailash-vibe-gemini-setup) (same architecture for Gemini CLI)
+Built for the [Kailash SDK](https://github.com/terrene-foundation/kailash-py) ecosystem ([Core SDK](https://github.com/terrene-foundation/kailash-py), [DataFlow](https://github.com/terrene-foundation/kailash-py), [Nexus](https://github.com/terrene-foundation/kailash-py), [Kaizen](https://github.com/terrene-foundation/kailash-py)), but the COC architecture is framework-agnostic. Fork this repo, replace the Kailash-specific skills and agents with your own framework knowledge, and you have COC for any stack.
 
 ---
 
@@ -164,6 +244,5 @@ Apache License, Version 2.0. See [LICENSE](LICENSE).
 
 <p align="center">
   <a href=".claude/guides/claude-code/README.md">Full Documentation</a> |
-  <a href="https://github.com/your-org/kailash_sdk">Kailash SDK</a> |
-  <a href="https://github.com/your-org/kailash-vibe-gemini-setup">Gemini Sibling</a>
+  <a href="https://github.com/terrene-foundation/kailash-py">Kailash SDK</a>
 </p>
