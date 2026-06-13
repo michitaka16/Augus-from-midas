@@ -1,0 +1,19 @@
+# DEMO PORTFOLIO — sample data for product demonstration
+Statement,Header,Period,Value
+Statement,Data,Start Date,2024-01-01
+Statement,Data,End Date,2024-12-31
+Statement,Data,Account,DU1234567
+Statement,Data,Broker,Interactive Brokers LLC
+Account Information,Header,Field,Value
+Account Information,Data,Name,Demo User
+Account Information,Data,Base Currency,SGD
+Account Information,Data,Account Type,INDIVIDUAL
+Account Information,Data,Regulatory,Bloomberg
+Mark-to-Market Performance Summary,Header,Symbol,Asset Category,Quantity,Currency,Current Price,Market Value,Cost Basis,Unrealized P/L,Percent of Portfolio
+Mark-to-Market Performance Summary,Data,VTI,ETFs,200,USD,245.30,49060.00,44100.00,4960.00,46.3
+Mark-to-Market Performance Summary,Data,VWO,ETFs,150,USD,48.20,7230.00,6800.00,430.00,6.8
+Mark-to-Market Performance Summary,Data,EEM,ETFs,100,USD,42.50,4250.00,4100.00,150.00,4.0
+Mark-to-Market Performance Summary,Data,AGG,ETFs,300,USD,98.10,29430.00,28500.00,930.00,27.8
+Mark-to-Market Performance Summary,Data,GLD,ETFs,50,USD,185.40,9270.00,9000.00,270.00,8.7
+Mark-to-Market Performance Summary,Data,XLE,ETFs,75,USD,89.20,6690.00,6500.00,190.00,6.3
+Mark-to-Market Performance Summary,Data,Total,ETFs,875,USD,,105930.00,100000.00,5930.00,100.0

@@ -1,0 +1,296 @@
+{
+  "presets": {
+    "ethical_investor": {
+      "name": "Ethical Investor",
+      "description": "Excludes sectors violating common ethical standards",
+      "preset_category": "Ethical & ESG",
+      "constraints": {
+        "hard": {},
+        "soft": {}
+      },
+      "_impl": {
+        "categories": {
+          "weapons": {
+            "label": "Weapons",
+            "description": "Exclude ETFs with weapons-related sector exposure",
+            "default": true,
+            "hard": true,
+            "affected_etfs": ["XLF"]
+          },
+          "tobacco": {
+            "label": "Tobacco",
+            "description": "Exclude ETFs with tobacco sector exposure",
+            "default": true,
+            "hard": false,
+            "affected_etfs": ["VTI", "VOO", "SPY"]
+          },
+          "gambling": {
+            "label": "Gambling",
+            "description": "Exclude ETFs with gambling/casino sector exposure",
+            "default": true,
+            "hard": false,
+            "affected_etfs": ["VTI", "VOO", "SPY"]
+          },
+          "alcohol": {
+            "label": "Alcohol",
+            "description": "Exclude ETFs with alcohol/beverage sector > 1%",
+            "default": false,
+            "hard": false,
+            "affected_etfs": ["VTI", "VOO", "SPY"]
+          },
+          "fossil_fuels": {
+            "label": "Fossil Fuels",
+            "description": "Exclude ETFs with fossil fuel / energy sector exposure",
+            "default": false,
+            "hard": true,
+            "affected_etfs": ["XLE"]
+          },
+          "adult_content": {
+            "label": "Adult Content",
+            "description": "Warn about adult content exposure — rare in public equities, mostly private",
+            "default": false,
+            "hard": false,
+            "affected_etfs": [],
+            "note": "Rare in public equities, mostly private"
+          }
+        }
+      }
+    },
+    "geopolitical_screen": {
+      "name": "Geopolitical Screen",
+      "description": "Excludes ETFs with exposure to sanctioned and monitored countries",
+      "preset_category": "Geopolitical",
+      "constraints": {
+        "hard": {},
+        "soft": {}
+      },
+      "_impl": {
+        "hard_countries": {
+          "russia": {
+            "label": "Russia",
+            "default": true,
+            "hard": true,
+            "affected_etfs": []
+          },
+          "north_korea": {
+            "label": "North Korea",
+            "default": true,
+            "hard": true,
+            "affected_etfs": []
+          },
+          "iran": {
+            "label": "Iran",
+            "default": true,
+            "hard": true,
+            "affected_etfs": []
+          },
+          "cuba": {
+            "label": "Cuba",
+            "default": true,
+            "hard": true,
+            "affected_etfs": []
+          },
+          "syria": {
+            "label": "Syria",
+            "default": true,
+            "hard": true,
+            "affected_etfs": []
+          },
+          "myanmar": {
+            "label": "Myanmar",
+            "default": true,
+            "hard": true,
+            "affected_etfs": []
+          }
+        },
+        "soft_countries": {
+          "china": {
+            "label": "China",
+            "default": true,
+            "threshold": 10.0,
+            "hard": false,
+            "affected_etfs": ["VWO", "EEM"]
+          },
+          "hong_kong": {
+            "label": "Hong Kong",
+            "default": false,
+            "threshold": 10.0,
+            "hard": false,
+            "affected_etfs": ["VWO", "EEM"]
+          },
+          "taiwan": {
+            "label": "Taiwan",
+            "default": false,
+            "threshold": 15.0,
+            "hard": false,
+            "affected_etfs": ["VWO", "EEM", "QQQ"]
+          },
+          "saudi_arabia": {
+            "label": "Saudi Arabia",
+            "default": false,
+            "threshold": 10.0,
+            "hard": false,
+            "affected_etfs": ["EEM"]
+          },
+          "uae": {
+            "label": "UAE",
+            "default": false,
+            "threshold": 10.0,
+            "hard": false,
+            "affected_etfs": ["EEM"]
+          },
+          "venezuela": {
+            "label": "Venezuela",
+            "default": false,
+            "threshold": 5.0,
+            "hard": false,
+            "affected_etfs": []
+          }
+        }
+      }
+    },
+    "climate_first": {
+      "name": "Climate First",
+      "description": "Excludes fossil fuel producers and high-carbon sectors",
+      "preset_category": "Ethical & ESG",
+      "constraints": {
+        "hard": {
+          "sector_blacklist": ["XLE"],
+          "sector_exposure": {
+            "max": {
+              "energy": 0.15
+            }
+          }
+        },
+        "soft": {
+          "sector_exposure": {
+            "max": {
+              "energy": 0.3
+            }
+          }
+        }
+      },
+      "_impl": {
+        "sector_blacklist": {
+          "XLE": "Energy sector (oil & gas extraction, coal)"
+        }
+      }
+    },
+    "low_volatility": {
+      "name": "Low Volatility",
+      "description": "Only ETFs with 252-day volatility ≤ 15%",
+      "preset_category": "Risk & Cost",
+      "constraints": {"hard": {}, "soft": {}},
+      "_impl": {
+        "rule_type": "feature_threshold",
+        "feature": "volatility_252d",
+        "operator": "<=",
+        "threshold": 0.15,
+        "green_label": "Low volatility (≤15%)",
+        "red_label": "High volatility (>15%)"
+      }
+    },
+    "high_dividend": {
+      "name": "High Dividend",
+      "description": "Only ETFs with dividend yield ≥ 3%",
+      "preset_category": "Risk & Cost",
+      "constraints": {"hard": {}, "soft": {}},
+      "_impl": {
+        "rule_type": "feature_threshold",
+        "feature": "yield",
+        "operator": ">=",
+        "threshold": 3.0,
+        "green_label": "High yield (≥3%)",
+        "red_label": "Low yield (<3%)"
+      }
+    },
+    "cost_conscious": {
+      "name": "Cost-Conscious",
+      "description": "Only ETFs with expense ratio ≤ 0.10%",
+      "preset_category": "Risk & Cost",
+      "constraints": {"hard": {}, "soft": {}},
+      "_impl": {
+        "rule_type": "feature_threshold",
+        "feature": "expense_ratio",
+        "operator": "<=",
+        "threshold": 0.001,
+        "green_label": "Low cost (≤0.10%)",
+        "red_label": "High cost (>0.10%)"
+      }
+    },
+    "tech_heavy": {
+      "name": "Tech-Heavy",
+      "description": "Only ETFs with tech sector exposure ≥ 30%",
+      "preset_category": "Sector Focus",
+      "constraints": {"hard": {}, "soft": {}},
+      "_impl": {
+        "rule_type": "ticker_list",
+        "green_etfs": ["QQQ", "XLK", "VTI", "VOO", "SPY"],
+        "red_etfs": [],
+        "yellow_etfs": [],
+        "green_label": "Tech-heavy (≥30%)",
+        "red_label": "Low tech exposure"
+      }
+    },
+    "tech_free": {
+      "name": "Tech-Free",
+      "description": "Excludes ETFs with tech sector exposure > 20%",
+      "preset_category": "Sector Focus",
+      "constraints": {"hard": {}, "soft": {}},
+      "_impl": {
+        "rule_type": "ticker_list",
+        "green_etfs": ["AGG", "BND", "SCHD", "XLE", "XLF", "XLV", "GLD", "SLV", "EEM", "EFA", "VEA", "VWO", "IWM", "ESGU"],
+        "red_etfs": ["QQQ", "XLK", "VTI", "VOO", "SPY"],
+        "yellow_etfs": [],
+        "green_label": "Tech-free (<20%)",
+        "red_label": "Tech exposure >20%"
+      }
+    },
+    "core_satellite": {
+      "name": "Core-Satellite",
+      "description": "Portfolio should be at least 60% US Broad Equity (cluster 1)",
+      "preset_category": "Portfolio Structure",
+      "constraints": {"hard": {}, "soft": {}},
+      "_impl": {
+        "rule_type": "portfolio_level",
+        "cluster_id": 1,
+        "threshold": 0.60,
+        "green_label": "Core ≥60% US Broad Equity",
+        "yellow_label": "Core <60% US Broad Equity",
+        "yellow_detail": "US Broad Equity <60% of portfolio"
+      }
+    },
+    "esg_screen": {
+      "name": "ESG Screen",
+      "description": "Aligned with ESG principles using ESGU as benchmark",
+      "preset_category": "Ethical & ESG",
+      "constraints": {"hard": {}, "soft": {}},
+      "_impl": {
+        "rule_type": "similarity_benchmark",
+        "benchmark_ticker": "ESGU",
+        "threshold_green": 0.80,
+        "threshold_yellow": 0.60,
+        "green_label": "ESG-aligned (sim ≥ 0.80 to ESGU)",
+        "yellow_label": "Moderate ESG alignment",
+        "red_label": "Low ESG alignment (sim < 0.60 to ESGU)"
+      }
+    }
+  },
+  "sectors": {
+    "energy": ["XLE"],
+    "financial": ["XLF"],
+    "healthcare": ["XLV"],
+    "tech": ["XLK"],
+    "consumer": ["XLY", "XHB"],
+    "industrial": ["XLI"],
+    "materials": ["XLB"],
+    "utilities": ["XLU"],
+    "real_estate": ["XLRE"],
+    "communications": ["XLC"]
+  },
+  "countries": {
+    "us": ["VTI", "VOO", "SPY", "QQQ", "IWM", "VIG", "SCHD", "ESGU", "XLK", "XLF", "XLE", "XLV", "XLI", "BND", "AGG", "TLT", "LQD", "GLD", "SLV"],
+    "developed_intl": ["VEA", "EFA"],
+    "emerging": ["VWO", "EEM"]
+  }
+}
